@@ -1,0 +1,13 @@
+---
+description: Jadu Next.js + Prisma API conventions
+globs: app/api/**/*.ts,lib/**/*.ts
+---
+
+# Jadu project rules
+
+- **Routes** (`app/api/**`): HTTP only. Use `@/lib/http/request` for parsing, `@/lib/http/responses` for JSON. Call `@/lib/services/*` — no direct `prisma` in route files.
+- **Services** (`lib/services/`): Prisma access, DTO mapping, `AppError` for domain errors (404, bad input).
+- **Validation** (`lib/validations/`): Zod schemas for every body/query/param.
+- **Todo status**: Int in DB; allowed values and labels live in `@/lib/constants/todo-status.ts`. Never reuse numeric status IDs.
+- **API shape**: Success `{ data, meta? }`, errors `{ error: { message, code? } }`.
+- **REST**: Plural resources (`/api/todos`). Full standards: `docs/CODING_STANDARDS.md`.
