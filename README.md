@@ -1,6 +1,14 @@
+# Jadu
+
+## Important command
+
 psql -U postgres
 
 npx prisma studio
+
+npx prisma migrate dev
+
+npx prisma generate
 
 ## Prisma Invalid URL Error Debugging
 

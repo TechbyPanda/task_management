@@ -1,38 +1,88 @@
-import Task from "@/types/task";
+import Task from "@/types/Task";
+import Status from "@/types/Status";
 
-function statusLabel(status: number): string {
-    if (status === 0) return "To do";
-    if (status === 1) return "Done";
+function formatStatusName(name: string): string {
+    return name
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function getStatusForValue(statuses: Status[], value: number): Status | undefined {
+    return statuses.find((s) => s.value === value);
+}
+
+function statusLabel(status: number, statuses: Status[]): string {
+    const s = getStatusForValue(statuses, status);
+    if (s) return formatStatusName(s.name);
     return `Status ${status}`;
 }
 
-function statusStyles(status: number): string {
-    if (status === 1) {
+function isDoneStatus(status: number, statuses: Status[]): boolean {
+    const s = getStatusForValue(statuses, status);
+    if (!s) return false;
+    const n = s.name.toLowerCase();
+    return n === "done" || n === "completed" || n === "closed";
+}
+
+function statusStyles(status: number, statuses: Status[]): string {
+    const s = getStatusForValue(statuses, status);
+    const n = (s?.name ?? "").toLowerCase();
+    if (n === "done" || n === "completed" || n === "closed") {
         return "bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200/60";
     }
-    if (status === 0) {
+    if (n === "pending" || n === "todo" || n === "to_do" || n === "open") {
         return "bg-amber-100 text-amber-800 ring-1 ring-amber-200/60";
+    }
+    if (n.includes("progress") || n === "in progress") {
+        return "bg-indigo-100 text-indigo-800 ring-1 ring-indigo-200/60";
     }
     return "bg-slate-100 text-slate-600 ring-1 ring-slate-200/60";
 }
 
-export default function TaskList({ tasks }: { tasks: Task[] }) {
-    const doneCount = tasks.filter((t) => t.status === 1).length;
+export default function TaskList({ tasks, statuses }: { tasks: Task[], statuses: Status[] }) {
+    const doneCount = tasks.filter((t) => isDoneStatus(t.status, statuses)).length;
     const hasTasks = tasks.length > 0;
+
+    const statusSummary = [...statuses]
+        .sort((a, b) => a.value - b.value)
+        .map((s) => ({
+            ...s,
+            count: tasks.filter((t) => t.status === s.value).length,
+        }));
 
     return (
         <section>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
                 <h2 className="text-lg font-bold text-slate-800">Your Tasks</h2>
                 <span
                     id="taskCounter"
-                    className="text-xs font-bold bg-slate-200 text-slate-600 px-2 py-1 rounded-md"
+                    className="text-xs font-bold bg-slate-200 text-slate-600 px-2 py-1 rounded-md shrink-0 self-start sm:self-auto"
                 >
                     {hasTasks
                         ? `${tasks.length} total${doneCount > 0 ? ` · ${doneCount} done` : ""}`
                         : "0 total"}
                 </span>
             </div>
+
+            {statuses.length > 0 && (
+                <div
+                    className="flex flex-wrap gap-2 mb-4"
+                    aria-label="Tasks by status"
+                >
+                    {statusSummary.map((s) => (
+                        <span
+                            key={s.value}
+                            className={[
+                                "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium",
+                                statusStyles(s.value, statuses),
+                            ].join(" ")}
+                        >
+                            <span>{formatStatusName(s.name)}</span>
+                            <span className="tabular-nums opacity-90">{s.count}</span>
+                        </span>
+                    ))}
+                </div>
+            )}
 
             <div id="taskList" className="space-y-3">
                 {!hasTasks ? (
@@ -64,7 +114,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
                 ) : (
                     <ul className="space-y-3" aria-label="Task list">
                         {tasks.map((task) => {
-                            const isDone = task.status === 1;
+                            const isDone = isDoneStatus(task.status, statuses);
                             return (
                                 <li key={task.id}>
                                     <article
@@ -131,10 +181,10 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
                                                 <span
                                                     className={[
                                                         "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold",
-                                                        statusStyles(task.status),
+                                                        statusStyles(task.status, statuses),
                                                     ].join(" ")}
                                                 >
-                                                    {statusLabel(task.status)}
+                                                    {statusLabel(task.status, statuses)}
                                                 </span>
                                             </div>
                                             <p className="mt-1 text-xs text-slate-400">

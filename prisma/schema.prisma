@@ -17,3 +17,8 @@ model Task {
   title String
   status Int
 }
+
+model Status {
+  name String
+  value Int @id @default(autoincrement())
+}
