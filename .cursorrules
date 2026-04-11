@@ -1,0 +1,33 @@
+# Next.js Fullstack Standards
+
+## 1. Project Architecture
+Follow a strict layered architecture to separate UI from business logic:
+- **@/components**: Pure UI components (Radix, Tailwind). No direct API calls.
+- **@/services**: Business logic and external API integrations (e.g., Stripe, Database, external APIs).
+- **@/hooks**: Client-side state logic and reusable UI behaviors.
+- **@/lib**: Utility functions, shared constants, and client initializations (Prisma, Supabase, etc.).
+- **@/types**: Shared TypeScript interfaces/types.
+
+## 2. Coding Patterns
+- **Functional Components**: Use arrow functions (`const MyComp = () => {}`).
+- **No Barrel Exports**: Do NOT create `index.ts` files for exports. Import directly from the file.
+- **Server vs Client**: Default to Server Components. Use `'use client'` only when necessary for interactivity or hooks.
+- **Data Fetching**: 
+  - Use **Server Actions** for mutations (POST/PATCH/DELETE).
+  - Use **Services** within Server Components for initial data fetching.
+
+## 3. API & Service Layer Rules
+- Every API interaction must reside in `services/`.
+- Services must return predictable result objects: `{ data, error }`.
+- Use **Zod** for all input validation (Schema-first development).
+- Handle errors gracefully; never leave an empty `catch` block.
+
+## 4. Frontend & Styling
+- **Tailwind CSS**: Use utility classes. Avoid arbitrary values; use the theme config.
+- **Consistency**: Use `lucide-react` for icons and `clsx` / `tailwind-merge` for dynamic classes.
+- **Components**: Break down large components into smaller primitives within the same directory if they aren't reused elsewhere.
+
+## 5. Agent Instructions
+- **Stay Concise**: Do not explain basic React/Next.js concepts. Just provide the code.
+- **File Creation**: When creating a new feature, automatically suggest the Service, the Type, and the Component in one go.
+- **TypeScript**: Always use strict typing. Avoid `any`. Use `interface` for data structures and `type` for unions/aliases.

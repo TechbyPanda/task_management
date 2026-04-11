@@ -2,7 +2,6 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import NewTask from "@/components/NewTask";
 import TaskList from "@/components/TaskList";
-import React from "react";
 
 export default function Home() {
   return (
